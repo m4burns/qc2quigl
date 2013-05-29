@@ -132,6 +132,8 @@ public:
     unsigned int gateCount(std::string gateName);
     //! Returns the Circuit Depth
     unsigned int depth();
+    //! Returns the Circuit T-Depth
+    unsigned int tDepth();
     ///@}
 
     //! Returns a std::vector of ints specifying the last gate in each parallel block.
