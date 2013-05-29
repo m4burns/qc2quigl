@@ -240,11 +240,27 @@ void writeGateSeq(std::shared_ptr<Circuit> circ, writectx & w) {
   }
 }
 
+void annotate(std::shared_ptr<Circuit> circ, writectx & w) {
+  auto annot = [&](std::string lab, int val){ 
+    w.out << w.ind(0) << "<annotation><label>" << lab << "</label><quantity><integer>" << val << "</integer></quantity></annotation>\n";
+  };
+  w.ind(1); 
+  annot ("countT",circ->gateCount("T") + circ->gateCount("T*"));
+  // annot ("countCNOT",circ->gateCount("TOF")); wont work because stored circuit uses X.  Might not be necessary anyway
+  annot ("countH",circ->gateCount("H"));
+  annot ("depthT",circ->tDepth());
+  annot ("width_delta",0);
+  w.ind(-1); 
+}
+
 void writeSubcircuit(std::string name, std::shared_ptr<Circuit> circ, writectx & w) {
   w.pushmap(circ);
   w.out << w.ind(1) << "<statement>\n";
   w.out << w.ind(1) << "<procedure>\n";
   w.out << w.ind(1) << "<name>" << name << "</name>\n";
+  w.out << w.ind(0) << "<annotations>";
+  annotate(circ,w);
+  w.out << w.ind(-1) << "</annotations>\n";
   w.out << w.ind(0) << "<quantum>\n";
   w.ind(1);
   for(unsigned int i = 0; i < circ->numLines(); ++i) {
@@ -288,9 +304,14 @@ void convert(std::shared_ptr<Circuit> circ, std::ostream & out) {
       << "<circuit xmlns=\"http://torque.bbn.com/ns/QuIGL\"\n"
       << "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
       << "         xsi:schemaLocation=\"http://torque.bbn.com/ns/QuIGL ../xsd/QuIGL.xsd\">\n";
-
   writectx w(out);
   w.pushmap(circ);
+  
+  w.ind(1); 
+  w.out << w.ind(0) << "<annotations>\n";
+  annotate(circ,w);
+  w.out << w.ind(0) << "</annotations>\n";
+  w.ind(-1); 
 
   /* Write all subcircuits */
   for(auto sub : circ->subcircuits) {

@@ -128,6 +128,25 @@ unsigned int Circuit::depth()
     return depth;
 }
 
+unsigned int Circuit::tDepth()
+{
+    unsigned int depth = 0;
+    for(unsigned int i = 0; i < gates.size(); i++) {
+        shared_ptr<Subcircuit> s = dynamic_pointer_cast<Subcircuit>(gates.at(i));
+        string gName = gates.at(i)->getName();
+        if (s) {
+            depth += s->getCircuit()->tDepth();
+        } else if (gName.compare("T") == 0 || gName.compare("T*") == 0 ) {
+          depth++;
+          while ((gName.compare("T") == 0 || gName.compare("T*") == 0) && i < gates.size()) {
+            i++;
+            gName = gates.at(i)->getName();
+          }
+       }
+    }
+    return depth;
+}
+
 int Circuit::QCost()
 {
     return 0;
